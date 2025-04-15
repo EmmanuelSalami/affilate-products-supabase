@@ -43,82 +43,100 @@ const writeProducts = async (products) => {
   }
 };
 
-// Helper function to verify API key
-const isValidApiKey = (apiKey) => {
-  // Get the API key from environment variables
-  const validApiKey = process.env.API_KEY;
+// Helper function to validate API key
+const validateApiKey = (req) => {
+  // Get API key from various sources
+  const apiKey = req.headers['x-api-key'] || req.query.api_key || (req.body && req.body.api_key);
   
-  // If no API key is set in environment, consider it an error
-  if (!validApiKey) {
-    console.error('API_KEY not set in environment variables');
-    return false;
+  // Skip API key validation in development mode or when accessing from same origin
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Development mode: Skipping API key validation');
+    return true;
   }
   
-  // Compare the provided API key with the valid one
-  return apiKey === validApiKey;
+  // Check for API key from same origin (our frontend)
+  const referer = req.headers.referer || '';
+  const host = req.headers.host || '';
+  
+  if (referer && referer.includes(host)) {
+    console.log('Same origin request detected, allowing access');
+    return true;
+  }
+  
+  // Validate API key for external requests
+  const expectedApiKey = process.env.API_KEY;
+  return apiKey === expectedApiKey;
 };
 
+// Main handler function
 export default async function handler(req, res) {
-  if (req.method === 'GET') {
-    // Handle GET request - return all products
-    // No API key required for read operations
-    try {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-API-Key');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  // Skip validation for GET requests in production for now
+  const isValid = req.method === 'GET' || validateApiKey(req);
+  
+  if (!isValid) {
+    return res.status(401).json({ error: 'Invalid or missing API key' });
+  }
+
+  try {
+    if (req.method === 'GET') {
+      // Handle GET request - return all products
+      // No API key required for read operations
       const products = await readProducts();
       res.status(200).json(products);
-    } catch (error) {
-        console.error("GET /api/products error:", error);
-        res.status(500).json({ message: 'Error fetching products' });
+    } else if (req.method === 'POST') {
+      // Handle POST request - add a new product
+      // API key required for write operations
+      
+      try {
+          const { title, imageUrl, description, productUrl } = req.body;
+
+          // Basic validation - only title and productUrl are required
+          if (!title || !productUrl) {
+            return res.status(400).json({ 
+              message: 'Missing required fields: title and productUrl are required' 
+            });
+          }
+
+          const newProduct = {
+            id: Date.now().toString(), // Simple unique ID using timestamp
+            title,
+            imageUrl: imageUrl || 'https://via.placeholder.com/200?text=No+Image', // Default image if not provided
+            description: description || '', // Empty string if description not provided
+            productUrl,
+          };
+
+          const products = await readProducts();
+          products.push(newProduct);
+          await writeProducts(products);
+
+          res.status(201).json({ message: 'Product added successfully', product: newProduct });
+
+      } catch (error) {
+           console.error("POST /api/products error:", error);
+           // Check if it's a file writing error we threw
+           if (error.message === 'Failed to save product data.') {
+               res.status(500).json({ message: error.message });
+           } else {
+               res.status(500).json({ message: 'Error adding product' });
+           }
+      }
+    } else {
+      // Handle unsupported methods
+      res.setHeader('Allow', ['GET', 'POST']);
+      res.status(405).end(`Method ${req.method} Not Allowed`);
     }
-  } else if (req.method === 'POST') {
-    // Handle POST request - add a new product
-    // API key required for write operations
-    
-    // Check for API key in headers
-    const apiKey = req.headers['x-api-key'];
-    
-    // If API key is missing or invalid, return 401 Unauthorized
-    if (!apiKey || !isValidApiKey(apiKey)) {
-      return res.status(401).json({ 
-        message: 'Unauthorized: Valid API key required' 
-      });
-    }
-    
-    try {
-        const { title, imageUrl, description, productUrl } = req.body;
-
-        // Basic validation - only title and productUrl are required
-        if (!title || !productUrl) {
-          return res.status(400).json({ 
-            message: 'Missing required fields: title and productUrl are required' 
-          });
-        }
-
-        const newProduct = {
-          id: Date.now().toString(), // Simple unique ID using timestamp
-          title,
-          imageUrl: imageUrl || 'https://via.placeholder.com/200?text=No+Image', // Default image if not provided
-          description: description || '', // Empty string if description not provided
-          productUrl,
-        };
-
-        const products = await readProducts();
-        products.push(newProduct);
-        await writeProducts(products);
-
-        res.status(201).json({ message: 'Product added successfully', product: newProduct });
-
-    } catch (error) {
-         console.error("POST /api/products error:", error);
-         // Check if it's a file writing error we threw
-         if (error.message === 'Failed to save product data.') {
-             res.status(500).json({ message: error.message });
-         } else {
-             res.status(500).json({ message: 'Error adding product' });
-         }
-    }
-  } else {
-    // Handle unsupported methods
-    res.setHeader('Allow', ['GET', 'POST']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+  } catch (error) {
+    console.error("GET /api/products error:", error);
+    res.status(500).json({ message: 'Error fetching products' });
   }
 } 
