@@ -1,47 +1,33 @@
-import fs from 'fs';
-import path from 'path';
+import { Redis } from '@upstash/redis';
 
-// Helper function to get the full path to the JSON file
-const getProductsFilePath = () => {
-  // Go up two levels from pages/api to the project root, then into data/
-  return path.join(process.cwd(), 'data', 'products.json');
-};
+// Initialize Redis client
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+});
 
-// Helper function to read products from the JSON file
-const readProducts = () => {
-  const filePath = getProductsFilePath();
+// Helper function to read products from Redis
+const readProducts = async () => {
   try {
-    // Check if file exists before reading
-    if (!fs.existsSync(filePath)) {
-        // If it doesn't exist (e.g., first run), return an empty array
-        return [];
-    }
-    const jsonData = fs.readFileSync(filePath, 'utf-8');
-    // Handle empty file case
-    if (!jsonData) {
-        return [];
-    }
-    return JSON.parse(jsonData);
+    // Get the products from Redis
+    const products = await redis.get('products');
+    // Return empty array if no products exist yet
+    return products || [];
   } catch (error) {
-    console.error('Error reading products file:', error);
+    console.error('Error reading products from Redis:', error);
     // In case of read error, return empty array to avoid crashing
     return [];
   }
 };
 
-// Helper function to write products to the JSON file
-const writeProducts = (products) => {
-  const filePath = getProductsFilePath();
+// Helper function to write products to Redis
+const writeProducts = async (products) => {
   try {
-    const dataDir = path.dirname(filePath);
-    // Ensure the data directory exists
-    if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true });
-    }
-    fs.writeFileSync(filePath, JSON.stringify(products, null, 2)); // Pretty print JSON
+    // Store products in Redis
+    await redis.set('products', products);
   } catch (error) {
-    console.error('Error writing products file:', error);
-    // Optionally, re-throw or handle the error appropriately
+    console.error('Error writing products to Redis:', error);
+    // Throw an error for the handler to catch
     throw new Error('Failed to save product data.');
   }
 };
@@ -61,12 +47,12 @@ const isValidApiKey = (apiKey) => {
   return apiKey === validApiKey;
 };
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method === 'GET') {
     // Handle GET request - return all products
     // No API key required for read operations
     try {
-      const products = readProducts();
+      const products = await readProducts();
       res.status(200).json(products);
     } catch (error) {
         console.error("GET /api/products error:", error);
@@ -99,14 +85,14 @@ export default function handler(req, res) {
         const newProduct = {
           id: Date.now().toString(), // Simple unique ID using timestamp
           title,
-          imageUrl: imageUrl || 'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930', // Default image if not provided
+          imageUrl: imageUrl || 'https://via.placeholder.com/200?text=No+Image', // Default image if not provided
           description: description || '', // Empty string if description not provided
           productUrl,
         };
 
-        const products = readProducts();
+        const products = await readProducts();
         products.push(newProduct);
-        writeProducts(products);
+        await writeProducts(products);
 
         res.status(201).json({ message: 'Product added successfully', product: newProduct });
 
