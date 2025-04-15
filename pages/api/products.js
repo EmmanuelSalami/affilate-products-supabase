@@ -1,4 +1,6 @@
 import { Redis } from '@upstash/redis';
+import fs from 'fs/promises'; // Import Node.js file system module
+import path from 'path'; // Import Node.js path module
 
 // Initialize Redis client with error handling
 let redis;
@@ -17,6 +19,9 @@ try {
   console.error('Failed to initialize Redis client:', error);
 }
 
+// Path to the products JSON file
+const productsFilePath = path.join(process.cwd(), 'data', 'products.json');
+
 // Helper function to read products from Redis - EXPORTED
 export const readProducts = async () => {
   if (!redis) {
@@ -25,12 +30,27 @@ export const readProducts = async () => {
   }
   try {
     // Use redis.get to retrieve the JSON string
-    const productsJson = await redis.get('products');
-    // If productsJson is null or empty, return an empty array
+    let productsJson = await redis.get('products');
+    
+    // If productsJson is null or empty, seed from file
     if (!productsJson) {
-      return [];
+      console.log('Redis is empty. Seeding products from products.json...');
+      try {
+        const fileData = await fs.readFile(productsFilePath, 'utf-8');
+        const initialProducts = JSON.parse(fileData);
+        
+        // Write the initial products to Redis
+        await writeProducts(initialProducts); 
+        console.log('Successfully seeded Redis with products.');
+        return initialProducts; // Return the newly seeded data
+      } catch (seedError) {
+        console.error('Error seeding products from file:', seedError);
+        // If seeding fails, return empty array or throw specific error
+        return []; 
+      }
     }
-    // Parse the JSON string into an array
+    
+    // Parse the JSON string into an array if data exists in Redis
     return JSON.parse(productsJson);
   } catch (error) {
     // Handle potential JSON parsing errors
