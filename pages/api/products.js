@@ -17,17 +17,23 @@ try {
   console.error('Failed to initialize Redis client:', error);
 }
 
-// Helper function to read products from Redis
-const readProducts = async () => {
+// Helper function to read products from Redis - EXPORTED
+export const readProducts = async () => {
+  if (!redis) {
+    console.error('Redis client not initialized');
+    throw new Error('Database connection not available');
+  }
   try {
-    // Get the products from Redis
-    const products = await redis.get('products');
-    // Return empty array if no products exist yet
-    return products || [];
+    const products = await redis.hgetall('products');
+    // If products is null or empty, return an empty array
+    if (!products) {
+      return [];
+    }
+    // Convert the hash object into an array of products
+    return Object.values(products);
   } catch (error) {
-    console.error('Error reading products from Redis:', error);
-    // In case of read error, return empty array to avoid crashing
-    return [];
+    console.error('Error reading from Redis:', error);
+    throw new Error('Failed to fetch products from database');
   }
 };
 

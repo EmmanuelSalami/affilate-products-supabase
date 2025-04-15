@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import Image from 'next/image';
 import { useState } from 'react';
+import { readProducts } from './api/products'; // Import the data fetching function
 
 // Remove Geist font imports if not used elsewhere, or keep if needed
 // import { Geist, Geist_Mono } from "next/font/google";
@@ -9,24 +10,25 @@ import { useState } from 'react';
 
 // This function runs on the server for every request
 export async function getServerSideProps(context) {
-  // Determine the base URL dynamically
-  const protocol = context.req.headers['x-forwarded-proto'] || 'http';
-  const host = context.req.headers.host;
-  const baseUrl = `${protocol}://${host}`;
+  // Determine the base URL dynamically - NO LONGER NEEDED FOR FETCH
+  // const protocol = context.req.headers['x-forwarded-proto'] || 'http';
+  // const host = context.req.headers.host;
+  // const baseUrl = `${protocol}://${host}`;
 
   let products = [];
   let error = null;
 
   try {
-    // Fetch products from our API endpoint
-    const res = await fetch(`${baseUrl}/api/products`);
-    if (!res.ok) {
-      // Log detailed error if fetch failed
-      const errorBody = await res.text();
-      console.error(`API fetch error (${res.status}): ${errorBody}`);
-      throw new Error(`Failed to fetch products, status: ${res.status}`);
-    }
-    products = await res.json();
+    // Fetch products DIRECTLY by calling the imported function
+    // const res = await fetch(`${baseUrl}/api/products`); // REMOVED FETCH CALL
+    // if (!res.ok) {
+    //   const errorBody = await res.text();
+    //   console.error(`API fetch error (${res.status}): ${errorBody}`);
+    //   throw new Error(`Failed to fetch products, status: ${res.status}`);
+    // }
+    // products = await res.json(); // REMOVED JSON PARSING
+    
+    products = await readProducts(); // CALL DIRECTLY
   } catch (e) {
     console.error("getServerSideProps Error:", e);
     // Pass error state to the page component
