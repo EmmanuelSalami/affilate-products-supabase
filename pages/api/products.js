@@ -24,24 +24,35 @@ export const readProducts = async () => {
     throw new Error('Database connection not available');
   }
   try {
-    const products = await redis.hgetall('products');
-    // If products is null or empty, return an empty array
-    if (!products) {
+    // Use redis.get to retrieve the JSON string
+    const productsJson = await redis.get('products');
+    // If productsJson is null or empty, return an empty array
+    if (!productsJson) {
       return [];
     }
-    // Convert the hash object into an array of products
-    return Object.values(products);
+    // Parse the JSON string into an array
+    return JSON.parse(productsJson);
   } catch (error) {
+    // Handle potential JSON parsing errors
+    if (error instanceof SyntaxError) {
+      console.error('Error parsing products JSON from Redis:', error);
+      // Consider returning empty or attempting recovery/deletion of bad key
+      return []; 
+    }
     console.error('Error reading from Redis:', error);
     throw new Error('Failed to fetch products from database');
   }
 };
 
 // Helper function to write products to Redis
-const writeProducts = async (products) => {
+const writeProducts = async (productsArray) => {
+  if (!redis) {
+    console.error('Redis client not initialized');
+    throw new Error('Database connection not available');
+  }
   try {
-    // Store products in Redis
-    await redis.set('products', products);
+    // Store products in Redis as a JSON string
+    await redis.set('products', JSON.stringify(productsArray));
   } catch (error) {
     console.error('Error writing products to Redis:', error);
     // Throw an error for the handler to catch
