@@ -29,6 +29,12 @@ export const readProducts = async () => {
     throw new Error('Database connection not available');
   }
   try {
+    // --- TEMPORARY CODE TO DELETE BAD KEY --- 
+    console.log('Attempting to delete existing products key...');
+    await redis.del('products'); 
+    console.log('Deleted products key (if it existed).');
+    // --- END TEMPORARY CODE ---
+    
     // Use redis.get to retrieve the JSON string
     let productsJson = await redis.get('products');
     
