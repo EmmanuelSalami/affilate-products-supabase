@@ -29,43 +29,39 @@ export const readProducts = async () => {
     throw new Error('Database connection not available');
   }
   try {
-    // --- TEMPORARY CODE REMOVED ---
-    // console.log('Attempting to delete existing products key...');
-    // await redis.del('products'); 
-    // console.log('Deleted products key (if it existed).');
+    // --- TEMPORARY CODE TO DELETE BAD KEY (RE-ADDED) --- 
+    console.log('Attempting to delete existing products key (before new logic)...');
+    await redis.del('products'); 
+    console.log('Deleted products key (if it existed - before new logic).');
     // --- END TEMPORARY CODE ---
+
+    // Use redis.get - Assume client handles parsing
+    let products = await redis.get('products');
     
-    // Use redis.get to retrieve the JSON string
-    let productsJson = await redis.get('products');
-    
-    // If productsJson is null or empty, seed from file
-    if (!productsJson) {
-      console.log('Redis is empty. Seeding products from products.json...');
+    // If products is null or empty, seed from file
+    if (!products) {
+      console.log('Redis is empty. Seeding products from products.json (client handles stringify)...');
       try {
         const fileData = await fs.readFile(productsFilePath, 'utf-8');
-        const initialProducts = JSON.parse(fileData);
+        const initialProducts = JSON.parse(fileData); // Still need to parse the file data
         
-        // Write the initial products to Redis
+        // Write the initial products to Redis - Assume client handles stringify
         await writeProducts(initialProducts); 
-        console.log('Successfully seeded Redis with products.');
+        console.log('Successfully seeded Redis with products (client handles stringify).');
         return initialProducts; // Return the newly seeded data
       } catch (seedError) {
         console.error('Error seeding products from file:', seedError);
-        // If seeding fails, return empty array or throw specific error
         return []; 
       }
     }
     
-    // Parse the JSON string into an array if data exists in Redis
-    return JSON.parse(productsJson);
+    // Return the data directly - Assume client handled parsing
+    console.log('DEBUG: Returning data directly from redis.get');
+    return products;
+    
   } catch (error) {
-    // Handle potential JSON parsing errors
-    if (error instanceof SyntaxError) {
-      console.error('Error parsing products JSON from Redis:', error);
-      // Consider returning empty or attempting recovery/deletion of bad key
-      return []; 
-    }
-    console.error('Error reading from Redis:', error);
+     // Log other errors
+    console.error('Error interacting with Redis:', error);
     throw new Error('Failed to fetch products from database');
   }
 };
@@ -77,11 +73,10 @@ const writeProducts = async (productsArray) => {
     throw new Error('Database connection not available');
   }
   try {
-    // Store products in Redis as a JSON string
-    await redis.set('products', JSON.stringify(productsArray));
+    // Store products in Redis - Assume client handles stringify
+    await redis.set('products', productsArray); 
   } catch (error) {
     console.error('Error writing products to Redis:', error);
-    // Throw an error for the handler to catch
     throw new Error('Failed to save product data.');
   }
 };
@@ -153,7 +148,7 @@ export default async function handler(req, res) {
           const newProduct = {
             id: Date.now().toString(), // Simple unique ID using timestamp
             title,
-            imageUrl: imageUrl || 'https://via.placeholder.com/200?text=No+Image', // Default image if not provided
+            imageUrl: imageUrl || 'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930', // Default image if not provided
             description: description || '', // Empty string if description not provided
             productUrl,
           };
