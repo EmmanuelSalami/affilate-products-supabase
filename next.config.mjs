@@ -2,7 +2,25 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    unoptimized: true, // This allows any external image URL to be used with the Image component
+    domains: ['m.media-amazon.com', 'upload.wikimedia.org'],
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.module.rules.push({
+        test: /\.(png|jpe?g|gif|ico)$/i,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              publicPath: '/_next/static/media/',
+              outputPath: 'static/media/',
+            },
+          },
+        ],
+      });
+    }
+    return config;
   },
 };
 

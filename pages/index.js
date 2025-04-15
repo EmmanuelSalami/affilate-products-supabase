@@ -62,7 +62,10 @@ export default function Home({ products, error }) {
       <Head>
         <title>My Recommended Products</title>
         <meta name="description" content="My favorite recommended products from Amazon" />
-        <link rel="icon" href="/vecteezy_3d-best-product-icon_18868634.png" />
+        {/* Favicon setup with multiple formats */}
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/vecteezy_3d-best-product-icon_18868634.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/vecteezy_3d-best-product-icon_18868634.png" />
         {/* Add Google Fonts - Add Dancing Script for cursive heading, keep Playfair and Lato */}
         <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
         {/* Font Awesome for social media icons */}
