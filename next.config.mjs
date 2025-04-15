@@ -4,22 +4,8 @@ const nextConfig = {
   images: {
     domains: ['m.media-amazon.com', 'upload.wikimedia.org'],
   },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.module.rules.push({
-        test: /\.(png|jpe?g|gif|ico)$/i,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              name: '[name].[ext]',
-              publicPath: '/_next/static/media/',
-              outputPath: 'static/media/',
-            },
-          },
-        ],
-      });
-    }
+  assetPrefix: process.env.NODE_ENV === 'production' ? undefined : undefined,
+  webpack(config) {
     return config;
   },
 };
