@@ -1,10 +1,21 @@
 import { Redis } from '@upstash/redis';
 
-// Initialize Redis client
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
-});
+// Initialize Redis client with error handling
+let redis;
+try {
+  redis = new Redis({
+    url: process.env.KV_REST_API_URL,
+    token: process.env.KV_REST_API_TOKEN,
+  });
+  
+  console.log('Redis client initialized successfully');
+  // Log partial URL to debug without revealing full credentials
+  const partialUrl = process.env.KV_REST_API_URL ? 
+    `${process.env.KV_REST_API_URL.substring(0, 15)}...` : 'undefined';
+  console.log(`Redis URL (partial): ${partialUrl}`);
+} catch (error) {
+  console.error('Failed to initialize Redis client:', error);
+}
 
 // Helper function to read products from Redis
 const readProducts = async () => {
