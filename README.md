@@ -36,7 +36,7 @@ A stylish product recommendation page that displays product affiliate links in a
    # API Authentication
    API_KEY=your_secret_api_key
    
-   # Vercel KV (Redis) Configuration
+   # Vercel KV (Redis) Configuration - Use EXACTLY these variable names
    KV_REST_API_URL=your_upstash_url
    KV_REST_API_TOKEN=your_upstash_token
    ```
@@ -49,7 +49,11 @@ A stylish product recommendation page that displays product affiliate links in a
 
 1. Push your code to GitHub
 2. Connect your GitHub repository to Vercel
-3. Add the Vercel KV integration to your project in the Vercel dashboard
+3. Add the Vercel KV integration to your project in the Vercel dashboard:
+   - Go to your project in Vercel
+   - Click on "Storage" tab
+   - Find "KV" (Redis) and click "Connect"
+   - Follow the prompts to set up a new database
 4. Add the `API_KEY` environment variable in the Vercel dashboard
 5. Deploy!
 
@@ -61,6 +65,16 @@ This project uses Vercel KV (powered by Upstash Redis) for data storage:
 2. Environment variables are automatically injected by Vercel
 3. Initial product data is seeded from the `data/products.json` file
 4. Data persistence across deployments is handled automatically
+
+### Important Database Notes
+
+- **Environment Variable Names**: The application specifically expects `KV_REST_API_URL` and `KV_REST_API_TOKEN` variables. Using different names (like UPSTASH_REDIS_*) will cause connection issues.
+- **Client Configuration**: The app uses `@upstash/redis` client which automatically handles JSON serialization with the Vercel KV setup.
+- **Data Seeding**: On first run with an empty database, the system automatically populates Redis with data from `data/products.json`.
+- **Troubleshooting**: If you see 401 errors or "[object Object]" parsing errors, check that:
+  1. Your environment variables are named exactly as specified above
+  2. The Vercel KV integration is properly connected
+  3. You're not manually JSON.stringify'ing data before storing in Redis (the client handles this)
 
 ## Using the API
 
