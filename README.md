@@ -1,155 +1,145 @@
-# Amazon Product Recommendations
+Below is a **polished, beginner-friendly “Quick-Start” README** that walks a brand-new learner from *zero* (no GitHub repo, no Vercel account) to a live Supabase-powered site.
 
-A stylish product recommendation page that displays product affiliate links in an Amazon-style layout, with server-side rendering and Redis database storage via Vercel KV.
+---
 
-## Features
+```markdown
+# Affiliate-Product-Showcase 🛒✨  
+Showcase any set of affiliate products with a beautiful Amazon-style layout.  
+Built with **Next.js 15**, **Supabase** (PostgreSQL in the cloud), and **Vercel**.
 
-- Beautiful product display grid with Amazon-style cards
-- Search functionality to filter products by title
-- Full API for managing product recommendations
-- Persistent database storage using Vercel KV (Redis)
-- Automatic data seeding from products.json
-- Secure API key authentication
-- Responsive design
-- Elegant background and typography
+---
 
-## Technology Stack
+## 1  Features
+| | |
+|-|-|
+| 🔍 **Dynamic catalogue** | Reads products from a Supabase `products` table |
+| ➕/➖ **Add / Delete** | Secure POST & DELETE endpoints protected by an **API Key** |
+| ⚡ **Next.js 15** | Fast SSR pages + `/api` routes (no external server) |
+| 📱 **Responsive design** | Looks great on phone, tablet, or desktop |
+| 💬 **Open GET** | Anyone can browse products without a key |
 
-- **Frontend**: Next.js with server-side rendering
-- **Database**: Vercel KV (Redis) for serverless data storage
-- **Styling**: CSS-in-JS with inline styles
-- **Deployment**: Vercel
-- **Images**: Next.js Image component for optimization
+---
 
-## Deployment
+## 2  What you need before you start
 
-### Local Development
+| Tool | Why you need it | Where to get it |
+|-|-|-|
+| **Node ≥ 20** | runs the dev server | <https://nodejs.org> |
+| **npm (comes with Node)** | installs packages | installed automatically |
+| **Git** | gets code from GitHub | <https://git-scm.com> |
+| **GitHub account** | stores your own copy of the code | <https://github.com/join> |
+| **Supabase account** | free hosted Postgres DB | <https://supabase.com> |
+| **Vercel account** | 1-click cloud hosting | <https://vercel.com/signup> |
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   cd amazon-app
-   npm install
-   ```
-3. Create a `.env.local` file with your API key and Redis configuration:
-   ```
-   # API Authentication
-   API_KEY=your_secret_api_key
-   
-   # Vercel KV (Redis) Configuration - Use EXACTLY these variable names
-   KV_REST_API_URL=your_upstash_url
-   KV_REST_API_TOKEN=your_upstash_token
-   ```
-4. Run the development server:
-   ```bash
-   npm run dev
-   ```
+*(Students who only **clone + deploy** still need GitHub & Vercel accounts, but no CLI installs.)*
 
-### Deploying to Vercel
+---
 
-1. Push your code to GitHub
-2. Connect your GitHub repository to Vercel
-3. Add the Vercel KV integration to your project in the Vercel dashboard:
-   - Go to your project in Vercel
-   - Click on "Storage" tab
-   - Find "KV" (Redis) and click "Connect"
-   - Follow the prompts to set up a new database
-4. Add the `API_KEY` environment variable in the Vercel dashboard
-5. Deploy!
-
-## Database Setup
-
-This project uses Vercel KV (powered by Upstash Redis) for data storage:
-
-1. The database is automatically created when you add the Vercel KV integration
-2. Environment variables are automatically injected by Vercel
-3. Initial product data is seeded from the `data/products.json` file
-4. Data persistence across deployments is handled automatically
-
-### Important Database Notes
-
-- **Environment Variable Names**: The application specifically expects `KV_REST_API_URL` and `KV_REST_API_TOKEN` variables. Using different names (like UPSTASH_REDIS_*) will cause connection issues.
-- **Client Configuration**: The app uses `@upstash/redis` client which automatically handles JSON serialization with the Vercel KV setup.
-- **Data Seeding**: On first run with an empty database, the system automatically populates Redis with data from `data/products.json`.
-- **Troubleshooting**: If you see 401 errors or "[object Object]" parsing errors, check that:
-  1. Your environment variables are named exactly as specified above
-  2. The Vercel KV integration is properly connected
-  3. You're not manually JSON.stringify'ing data before storing in Redis (the client handles this)
-
-## Using the API
-
-### API Endpoints
-
-- `GET /api/products` - Get all products (no authentication required)
-- `GET /api/products?id=123` - Get a specific product by ID
-- `GET /api/products?title=keyword` - Search products by title
-- `POST /api/products` - Add a new product (requires API key)
-- `DELETE /api/products` - Delete one or more products by ID (requires API key)
-
-### Authentication
-
-All write operations require an API key provided in the headers:
-
-```
-x-api-key: your_api_key_here
-```
-
-### Adding a Product
-
-To add a product, send a POST request to `/api/products` with:
-
-```json
-{
-  "title": "Product Title",
-  "imageUrl": "https://example.com/image.jpg",
-  "description": "Product description",
-  "productUrl": "https://amazon.com/your-affiliate-link"
-}
-```
-
-Example using curl:
+## 3  Clone & Run locally (optional)
 
 ```bash
-curl -X POST https://your-app.vercel.app/api/products \
-  -H "Content-Type: application/json" \
-  -H "x-api-key: your_api_key_here" \
-  -d '{"title":"Example Product","productUrl":"https://amazon.com/affiliate-link"}'
+git clone https://github.com/YourUsername/affiliate-product-showcase.git
+cd affiliate-product-showcase
+npm install          # ⏳ first-time only
+npm run dev          # 🔥 http://localhost:3000
 ```
 
-Note:
-- Only `title` and `productUrl` are required
-- If `imageUrl` is not provided, a placeholder image will be used
-- If `description` is not provided, it will be empty
+---
 
-### Deleting Products
+## 4  Set up Supabase  ⚙️
 
-To delete products, send a DELETE request to `/api/products` with:
+1. **Create a project** in the Supabase dashboard  
+2. **Create a table** called **`products`**  
+   | Column | Type | PK | Not Null |
+   | id | text | ✅ | ✅ |
+   | title | text |  | ✅ |
+   | description | text |  |  |
+   | imageUrl | text |  |  |
+   | productUrl | text |  | ✅ |
+3. **Disable Row Level Security** (or add a “public read” policy)
+4. **Copy credentials** (`Project Settings → API`)  
+   - `SUPABASE_URL`  
+   - `SUPABASE_ANON_KEY`
 
-```json
-{
-  "ids": ["123", "456"]
-}
-```
+---
 
-Example using curl:
+## 5  Configure environment variables
+
+Create **`.env.local`** (not committed):
 
 ```bash
-curl -X DELETE https://your-app.vercel.app/api/products \
-  -H "Content-Type: application/json" \
-  -H "x-api-key: your_api_key_here" \
-  -d '{"ids":["1744742800424", "1744742847730"]}'
+SUPABASE_URL=https://YOUR-PROJECT.supabase.co
+SUPABASE_ANON_KEY=ey...
+API_KEY=make-up-your-own-secure-key
 ```
 
-## Security
+👉 `API_KEY` protects **POST** & **DELETE** requests.
 
-- API key is stored in environment variables
-- API key is required for any write operations
-- Same-origin requests bypass API key validation
-- Read operations (GET) don't require authentication for public display
+---
 
-## Data Persistence
+## 6  Pushing your own repo to GitHub 🚀
 
-- Product data is stored in Vercel KV Redis database
-- The database automatically seeds from `data/products.json` if empty
-- Changes made via the API are persisted across deployments
-- Vercel KV handles backups and reliability
+> &nbsp;&nbsp;Already have a GitHub repo? Jump to **step 7**.
+
+```bash
+# inside the project folder
+git init                        # if you haven’t already
+git remote remove origin || :   # ignore error if origin doesn’t exist
+git add .
+git commit -m "Initial Supabase version"
+
+# create a NEW empty repo on github.com, then:
+git remote add origin https://github.com/<YOUR_USER>/<NEW_REPO>.git
+git push -u origin main
+```
+
+(If Git asks for a username / token, paste the **GitHub → Settings → Developer → Classic Token**.)
+
+---
+
+## 7  Deploy to Vercel  ☁️
+
+1. Log in at <https://vercel.com>
+2. **“Add → Project” → Import Git Repository**  
+   choose your repo
+3. Framework preset **auto-detects “Next.js”**
+4. **Environment Variables**  
+   add `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `API_KEY`
+5. Click **Deploy**
+
+🟢 In ~60 seconds you’ll get a URL like  
+`https://affiliate-product-showcase.vercel.app`
+
+---
+
+## 8  Using the API
+
+| Action | Method & Path | Headers | Body example |
+|-|-|-|-|
+| **List products** | `GET /api/products` | – | – |
+| **Search** | `GET /api/products?title=sony` | – | – |
+| **Get by id** | `GET /api/products?id=123` | – | – |
+| **Create** | `POST /api/products` | `x-api-key: <API_KEY>` |```json { "title":"Watch", "productUrl":"https://amazon.com/...", "description":"Nice", "imageUrl":"" }```|
+| **Delete** | `DELETE /api/products` | `x-api-key: <API_KEY>` |```json { "ids":["123","456"] }```|
+
+Tip: test with **Postman** or command-line:  
+```bash
+curl -X POST https://<your-url>/api/products \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: $API_KEY" \
+  -d '{"title":"Test","productUrl":"https://..."}'
+```
+
+---
+
+## 9  FAQ / Troubleshooting
+
+| Problem | Fix |
+|-|-|
+| **Hydration error** | Make sure you **didn’t copy Date.now / Math.random** into render output |
+| **401 in Postman** | Add `x-api-key` header with your `API_KEY` |
+| **Supabase “empty array”** | Check RLS policy or that you inserted rows |
+| **Env vars not found on Vercel** | Settings → Environment Variables → redeploy |
+
+---
+
