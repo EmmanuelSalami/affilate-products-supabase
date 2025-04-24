@@ -72,7 +72,7 @@ npm run dev          # 🔥 http://localhost:3000
 
 ## 5  Configure environment variables
 
-Create **`.env.local`** (not committed):
+Create **`.env.`** (not committed): just rename the **.env.example** file to **.env** and then add the below:
 
 ```bash
 SUPABASE_URL=https://YOUR-PROJECT.supabase.co
@@ -99,23 +99,83 @@ Replace `your_username` with your real handles (or remove icons you don’t need
 
 ---
 
-## 7  Pushing your own repo to GitHub 🚀
+## 7  Push this project to **your own** GitHub repo 🚀
 
-> &nbsp;&nbsp;Already have a GitHub repo? Jump to **step 7**.
+> **Why bother?**  
+> You cloned *my* template. If you push straight away you’ll overwrite the original author’s repo (or you’ll get a permission error).  
+> Instead, push to **your own** fresh repository.
+
+### 7-A  Check what remotes (if any) are already set
 
 ```bash
-# inside the project folder
-git init                        # if you haven’t already
-git remote remove origin || :   # ignore error if origin doesn’t exist
-git add .
-git commit -m "Initial Supabase version"
+git remote -v         # lists remote names + URLs
 
-# create a NEW empty repo on github.com, then:
-git remote add origin https://github.com/<YOUR_USER>/<NEW_REPO>.git
+# expected outputs
+# (a) nothing -–> no remote set  ✅
+# (b) origin https://github.com/SomeoneElsesRepo.git  ❌ you’ll replace this
+```
+
+### 7-B  If a remote called `origin` already exists, remove it (so you don’t accidentally push to the wrong place)
+
+```bash
+git remote remove origin   # safe even if “origin” is missing
+```
+
+*(Nothing prints if it works.)*
+
+### 7-C  Create a **new empty repo** on GitHub (> 10 seconds)
+
+1. Open <https://github.com/new> in a browser  
+2. **Repository name** → e.g. `affiliate-product-showcase`  
+3. **Visibility** → Public (or Private)  
+4. **DON’T tick** ✓ “Add README”, “Add .gitignore”, “Add license”  
+5. Click **Create repository**.  
+   GitHub now shows some command-line snippets.
+
+Copy the **HTTPS** URL from the top – it looks like:
+
+```
+https://github.com/<YourUser>/<NewRepo>.git
+```
+
+### 7-D  Connect your local project to that new repo
+
+```bash
+git remote add origin https://github.com/<YourUser>/<NewRepo>.git
+git branch -M main           # ensures your branch is called “main”
+```
+
+> 💡 `origin` is just a nickname; it could be “github” or “banana”.  
+> Most tutorials stick with “origin”.
+
+### 7-E  Commit (if you haven’t already)
+
+```bash
+git add .
+git commit -m "First Supabase version"
+```
+
+Check your commit & remote:
+
+```bash
+git status           # should say “nothing to commit”
+git remote -v        # should show the *new* URL for origin
+```
+
+### 7-F  Push!
+
+```bash
 git push -u origin main
 ```
 
-(If Git asks for a username / token, paste the **GitHub → Settings → Developer → Classic Token**.)
+- First push may ask **GitHub username / personal-access token** (PAT).  
+  Follow the browser link Git prints to generate one if you haven’t before.  
+- After success, refresh your GitHub repo page → you’ll see your files.
+
+That’s it – your copy now lives in GitHub and can be imported into **Vercel** (see Step 8).
+```
+
+Copy-paste this block over your current Step 7 in the README and you’re good to go.
 
 ---
 
