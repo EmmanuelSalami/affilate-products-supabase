@@ -2,7 +2,7 @@ Below is a **polished, beginner-friendly “Quick-Start” README** that walks a
 
 ---
 
-```markdown
+
 # Affiliate-Product-Showcase 🛒✨  
 Showcase any set of affiliate products with a beautiful Amazon-style layout.  
 Built with **Next.js 15**, **Supabase** (PostgreSQL in the cloud), and **Vercel**.
@@ -84,7 +84,22 @@ API_KEY=make-up-your-own-secure-key
 
 ---
 
-## 6  Pushing your own repo to GitHub 🚀
+---
+
+## 6  Update social-media placeholders  🎨  
+Open **`pages/index.js`** and search for the three example links:
+
+```jsx
+href="https://instagram.com/your_username"
+href="https://twitter.com/your_username"
+href="https://tiktok.com/@your_username"
+```
+
+Replace `your_username` with your real handles (or remove icons you don’t need).
+
+---
+
+## 7  Pushing your own repo to GitHub 🚀
 
 > &nbsp;&nbsp;Already have a GitHub repo? Jump to **step 7**.
 
@@ -104,7 +119,7 @@ git push -u origin main
 
 ---
 
-## 7  Deploy to Vercel  ☁️
+## 8  Deploy to Vercel  ☁️
 
 1. Log in at <https://vercel.com>
 2. **“Add → Project” → Import Git Repository**  
@@ -119,7 +134,7 @@ git push -u origin main
 
 ---
 
-## 8  Using the API
+## 9  Using the API
 
 | Action | Method & Path | Headers | Body example |
 |-|-|-|-|
@@ -139,7 +154,7 @@ curl -X POST https://<your-url>/api/products \
 
 ---
 
-## 9  FAQ / Troubleshooting
+## 10  FAQ / Troubleshooting
 
 | Problem | Fix |
 |-|-|
