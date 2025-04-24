@@ -66,8 +66,16 @@ const deleteProductsByIds = async (idsToDelete) => {
   try {
     const { data, error } = await supabase.from('products')
       .delete()
-      .in('id', idsToDelete);
+      .in('id', idsToDelete)
+      .select(); // Added select to always return the deleted objects
     if (error) throw error;
+    if (data.length == 0) { // If no data was returned, then no products where deleted.
+       return {
+        deletedCount: 0,
+        deletedIds: [],
+        remainingCount: 'unknown (query again if needed)',
+      };
+    }
     return {
       deletedCount: data.length,
       deletedIds: data.map((p) => p.id),
@@ -78,6 +86,7 @@ const deleteProductsByIds = async (idsToDelete) => {
     throw new Error('Failed to delete products');
   }
 };
+
 
 const validateApiKey = (req) => {
   const apiKey = req.headers['x-api-key'] || req.query.api_key || (req.body && req.body.api_key);
