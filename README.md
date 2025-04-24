@@ -48,18 +48,25 @@ npm run dev          # 🔥 http://localhost:3000
 
 ## 4  Set up Supabase  ⚙️
 
-1. **Create a project** in the Supabase dashboard  
-2. **Create a table** called **`products`**  
-   | Column | Type | PK | Not Null |
-   | id | text | ✅ | ✅ |
-   | title | text |  | ✅ |
-   | description | text |  |  |
-   | imageUrl | text |  |  |
-   | productUrl | text |  | ✅ |
-3. **Disable Row Level Security** (or add a “public read” policy)
-4. **Copy credentials** (`Project Settings → API`)  
+| Column name | Data type | Primary Key | “Is Nullable” | Why |
+|-------------|-----------|-------------|---------------|-----|
+| **id**          | `text` | ✅ (check) | ❌ (untick) | Used as unique identifier |
+| **title**       | `text` |            | ❌ (untick) | Shown on the card and used for search |
+| description | `text` |            | ✅ (keep ticked) | Optional extra info |
+| imageUrl    | `text` |            | ✅ (keep ticked) | Falls back to placeholder if empty |
+| **productUrl**  | `text` |            | ❌ (untick) | Button needs a link |
+
+1. **Create the project** (Supabase Dashboard → *New Project*).  
+2. **Open Table Editor → New Table**  
+   - Name: `products`  
+   - Region: any  
+   - Add the columns exactly as in the table above.  
+3. **Disable Row-Level Security** *(or add a “Public Read” policy)*  
+   - Auth  →  Policies  →  Toggle RLS off for `products`.  
+4. Copy **`Settings → API`**  
    - `SUPABASE_URL`  
-   - `SUPABASE_ANON_KEY`
+   - `SUPABASE_ANON_KEY`  
+   - Paste these into `.env` and also into Vercel → Settings → Environment Variables before deploy.
 
 ---
 
