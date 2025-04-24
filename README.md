@@ -174,8 +174,6 @@ git push -u origin main
 
 That’s it – your copy now lives in GitHub and can be imported into **Vercel** (see Step 8).
 
-Copy-paste this block over your current Step 7 in the README and you’re good to go.
-
 ---
 
 ## 8  Deploy to Vercel  ☁️
