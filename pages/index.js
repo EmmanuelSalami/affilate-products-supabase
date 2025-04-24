@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import Image from 'next/image';
 import { useState } from 'react';
-import { readProducts } from './api/products'; // Import the data fetching function
+import { readProducts } from '../lib/products'; // ✅ Import safely outside the API context
 
 // Remove Geist font imports if not used elsewhere, or keep if needed
 // import { Geist, Geist_Mono } from "next/font/google";
