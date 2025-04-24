@@ -173,7 +173,6 @@ git push -u origin main
 - After success, refresh your GitHub repo page → you’ll see your files.
 
 That’s it – your copy now lives in GitHub and can be imported into **Vercel** (see Step 8).
-```
 
 Copy-paste this block over your current Step 7 in the README and you’re good to go.
 
